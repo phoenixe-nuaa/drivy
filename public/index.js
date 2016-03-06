@@ -165,7 +165,75 @@ var rentalModifications = [{
   'pickupDate': '2015-12-05'
 }];
 
-console.log(cars);
-console.log(rentals);
-console.log(actors);
-console.log(rentalModifications);
+function calc_rental_date(pd, rd) {
+	var p_date = new Date(pd),
+		p = p_date.getDate(),
+		r_date = new Date(rd),
+		r = r_date.getDate();
+	return (r-p) + 1;
+}
+
+
+function calc_rentals() {
+	rentals.map(function (rental) {
+		var car_id = rental.carId,
+			car_inf = cars.filter(car => car.id == car_id)[0],
+			days = calc_rental_date(rental.pickupDate, rental.returnDate),
+			time_price = car_inf.pricePerDay * days,
+			distance_price = car_inf.pricePerKm * rental.distance,
+			total_price = time_price + distance_price;
+		rental.price = total_price;
+	});
+	// console.log(rentals);			// Print the result
+}
+calc_rentals();
+
+function pricing_decreace() {
+	rentals.map(function (rental) {
+		var car_id = rental.carId,
+			car_inf = cars.filter(car => car.id == car_id)[0],
+			days = calc_rental_date(rental.pickupDate, rental.returnDate),
+			distance_price = car_inf.pricePerKm * rental.distance,
+			time_price,
+			total_price;
+
+		var daily_price = car_inf.pricePerDay;
+
+		if(days == 1) {
+			time_price = daily_price;
+		}
+		else if(days > 1 && days <= 4) {
+			time_price = daily_price+daily_price*0.9*(days-1);
+		}
+		else if(days > 4 && days <= 10) {
+			time_price = daily_price
+						+ daily_price*0.9*3
+						+ daily_price*0.7*(days-4);
+		}
+		else if(days > 10) {
+			time_price = daily_price
+						+ daily_price*0.9*3
+						+ daily_price*0.7*6
+						+ daily_price*0.5*(days-10);
+		}
+		total_price = time_price + distance_price;
+		rental.price = total_price;
+	});
+	// console.log(rentals);					// Print the result
+}
+pricing_decreace();
+
+function calc_commission() {
+	rentals.map(function (rental) {
+		var commission = rental.price*0.3;
+		rental.commission.insurance = commission*0.5;
+		rental.commission.assistance = calc_rental_date(rental.pickupDate, rental.returnDate);
+		rental.commission.drivy = commission - rental.commission.insurance - rental.commission.assistance;
+	});
+	console.log(rentals);					// Print the result
+};
+calc_commission();
+// console.log(cars);
+// console.log(rentals);
+// console.log(actors);
+// console.log(rentalModifications);
