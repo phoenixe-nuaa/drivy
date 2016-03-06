@@ -165,6 +165,7 @@ var rentalModifications = [{
   'pickupDate': '2015-12-05'
 }];
 
+
 function calc_rental_date(pd, rd) {
 	var p_date = new Date(pd),
 		p = p_date.getDate(),
@@ -173,7 +174,7 @@ function calc_rental_date(pd, rd) {
 	return (r-p) + 1;
 }
 
-
+// Exercice 1
 function calc_rentals() {
 	rentals.map(function (rental) {
 		var car_id = rental.carId,
@@ -184,10 +185,11 @@ function calc_rentals() {
 			total_price = time_price + distance_price;
 		rental.price = total_price;
 	});
-	// console.log(rentals);			// Print the result
+	// console.log(rentals);													// Print the result
 }
 calc_rentals();
 
+// Exercice 2
 function pricing_decreace() {
 	rentals.map(function (rental) {
 		var car_id = rental.carId,
@@ -199,18 +201,18 @@ function pricing_decreace() {
 
 		var daily_price = car_inf.pricePerDay;
 
-		if(days == 1) {
+		if (days == 1) {
 			time_price = daily_price;
 		}
-		else if(days > 1 && days <= 4) {
+		else if (days > 1 && days <= 4) {
 			time_price = daily_price+daily_price*0.9*(days-1);
 		}
-		else if(days > 4 && days <= 10) {
+		else if (days > 4 && days <= 10) {
 			time_price = daily_price
 						+ daily_price*0.9*3
 						+ daily_price*0.7*(days-4);
 		}
-		else if(days > 10) {
+		else if (days > 10) {
 			time_price = daily_price
 						+ daily_price*0.9*3
 						+ daily_price*0.7*6
@@ -219,10 +221,11 @@ function pricing_decreace() {
 		total_price = time_price + distance_price;
 		rental.price = total_price;
 	});
-	// console.log(rentals);					// Print the result
+	// console.log(rentals);													// Print the result
 }
 pricing_decreace();
 
+// Exercice 3
 function calc_commission() {
 	rentals.map(function (rental) {
 		var commission = rental.price*0.3;
@@ -230,10 +233,64 @@ function calc_commission() {
 		rental.commission.assistance = calc_rental_date(rental.pickupDate, rental.returnDate);
 		rental.commission.drivy = commission - rental.commission.insurance - rental.commission.assistance;
 	});
-	console.log(rentals);					// Print the result
+	// console.log(rentals);													// Print the result
 };
 calc_commission();
-// console.log(cars);
-// console.log(rentals);
-// console.log(actors);
-// console.log(rentalModifications);
+
+// Exercice 4
+function famous_deductible() {
+	rentals.map(function (rental) {
+		var rental_date = calc_rental_date(rental.pickupDate, rental.returnDate),
+			deduct_price = rental_date*4;
+		if (rental.options.deductibleReduction) {
+			rental.price += deduct_price;
+			rental.commission.drivy += deduct_price;
+		}
+	});
+	// console.log(rentals);													// Print the result
+}
+famous_deductible();
+
+// Exercice 5
+function pay_the_actors() {
+	rentals.map(function (rental) {
+		var actor = actors.filter(actor => actor.rentalId == rental.id)[0];
+		var commission = rental.commission.insurance
+						+ rental.commission.assistance
+						+ rental.commission.drivy;
+		actor.payment[0].amount = rental.price;
+		actor.payment[1].amount = rental.price - commission;
+		actor.payment[2].amount = rental.commission.insurance;
+		actor.payment[3].amount = rental.commission.assistance;
+		actor.payment[4].amount = rental.commission.drivy;
+	});
+	// console.log(JSON.stringify(actors, null, "  "));							// Print the result
+}
+pay_the_actors();
+
+// Exercice 6
+function rental_modification() {
+	rentalModifications.map(function (mod) {
+		var rental = rentals.filter(rental => rental.id == mod.rentalId)[0];
+		for (let item in mod) {
+			if (item == "rentalId") {
+				continue;
+			}
+			else {
+				rental[item] = mod[item];
+			}
+		}
+	});
+	calc_rentals();
+	pricing_decreace();
+	calc_commission();
+	famous_deductible();
+	pay_the_actors();
+	// console.log(rentals);													// Print the result
+}
+// rental_modification();														// Uncomment to modify the rental information
+
+console.log(cars);
+console.log(rentals);
+console.log(actors);
+console.log(rentalModifications);
